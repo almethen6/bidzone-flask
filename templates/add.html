@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Add Auction Item</h2>
+<form method="post">
+  <div class="mb-3">
+    <label>Title</label>
+    <input class="form-control" name="title" required>
+  </div>
+  <div class="mb-3">
+    <label>Description</label>
+    <textarea class="form-control" name="description" rows="3" required></textarea>
+  </div>
+  <div class="mb-3">
+    <label>Category</label>
+    <input class="form-control" name="category" required>
+  </div>
+  <div class="mb-3">
+    <label>Starting Price</label>
+    <input class="form-control" type="number" step="0.01" name="starting_price" required>
+  </div>
+  <div class="mb-3">
+    <label>Ends At</label>
+    <input class="form-control" type="datetime-local" name="end_time" required>
+  </div>
+  <button class="btn btn-success" type="submit">Add Item</button>
+</form>
+{% endblock %}

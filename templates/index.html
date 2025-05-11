@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Active Auctions</h2>
+<form class="row g-3 mb-4">
+  <div class="col-md-4">
+    <input class="form-control" name="search" placeholder="Search" value="{{ search }}">
+  </div>
+  <div class="col-md-3">
+    <select class="form-select" name="category">
+      <option value="">All Categories</option>
+      {% for cat in categories %}
+      <option value="{{cat}}" {% if cat == category %}selected{% endif %}>{{cat}}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-md-2">
+    <button class="btn btn-secondary" type="submit">Filter</button>
+  </div>
+</form>
+<div class="row">
+  {% for item in items %}
+  <div class="col-md-4 mb-4">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">{{ item.title }}</h5>
+        <p class="card-text">{{ item.description[:100] }}…</p>
+        <p><strong>Current:</strong> {{ item.current_price }} KD</p>
+        <p id="timer{{item.id}}"></p>
+        <script>
+          const end = new Date("{{ item.end_time.isoformat() }}").getTime();
+          setInterval(() => {
+            const now = Date.now(),
+                  diff = end - now;
+            if (diff < 0) {
+              document.getElementById("timer{{item.id}}").innerHTML = "Expired";
+              return;
+            }
+            const d = Math.floor(diff/86400000),
+                  h = Math.floor((diff%86400000)/3600000),
+                  m = Math.floor((diff%3600000)/60000),
+                  s = Math.floor((diff%60000)/1000);
+            document.getElementById("timer{{item.id}}").innerHTML = `${d}d ${h}h ${m}m ${s}s`;
+          }, 1000);
+        </script>
+        <a href="{{ url_for('item_detail', item_id=item.id) }}" class="btn btn-primary">View & Bid</a>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}
