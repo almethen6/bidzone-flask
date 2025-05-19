@@ -1,0 +1,4 @@
+instance/bidzone.db
+__pycache__/
+venv/
+*.pyc
