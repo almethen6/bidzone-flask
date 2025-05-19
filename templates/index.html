@@ -2,9 +2,7 @@
 {% block content %}
 <h2>Active Auctions</h2>
 <form class="row g-3 mb-4">
-  <div class="col-md-4">
-    <input class="form-control" name="search" placeholder="Search" value="{{ search }}">
-  </div>
+  <div class="col-md-4"><input class="form-control" name="search" placeholder="Search" value="{{ search }}"></div>
   <div class="col-md-3">
     <select class="form-select" name="category">
       <option value="">All Categories</option>
@@ -13,24 +11,25 @@
       {% endfor %}
     </select>
   </div>
-  <div class="col-md-2">
-    <button class="btn btn-secondary" type="submit">Filter</button>
-  </div>
+  <div class="col-md-2"><button class="btn btn-secondary" type="submit">Filter</button></div>
 </form>
 <div class="row">
   {% for item in items %}
   <div class="col-md-4 mb-4">
     <div class="card">
+      {% if item.image_filename %}
+      <img src="{{ url_for('static', filename='images/' ~ item.image_filename) }}"
+           class="card-img-top mb-2" alt="{{ item.title }}">
+      {% endif %}
       <div class="card-body">
         <h5 class="card-title">{{ item.title }}</h5>
         <p class="card-text">{{ item.description[:100] }}…</p>
         <p><strong>Current:</strong> {{ item.current_price }} KD</p>
         <p id="timer{{item.id}}"></p>
         <script>
-          const end = new Date("{{ item.end_time.isoformat() }}").getTime();
+          const end{{item.id}} = new Date("{{ item.end_time.isoformat() }}").getTime();
           setInterval(() => {
-            const now = Date.now(),
-                  diff = end - now;
+            const now = Date.now(), diff = end{{item.id}} - now;
             if (diff < 0) {
               document.getElementById("timer{{item.id}}").innerHTML = "Expired";
               return;

@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 {% block content %}
 <h2>Add Auction Item</h2>
-<form method="post">
+<form method="post" action="{{ url_for('add') }}" enctype="multipart/form-data">
   <div class="mb-3">
     <label>Title</label>
-    <input class="form-control" name="title" required>
+    <input class="form-control" type="text" name="title" required>
   </div>
   <div class="mb-3">
     <label>Description</label>
@@ -12,7 +12,7 @@
   </div>
   <div class="mb-3">
     <label>Category</label>
-    <input class="form-control" name="category" required>
+    <input class="form-control" type="text" name="category" required>
   </div>
   <div class="mb-3">
     <label>Starting Price</label>
@@ -21,6 +21,10 @@
   <div class="mb-3">
     <label>Ends At</label>
     <input class="form-control" type="datetime-local" name="end_time" required>
+  </div>
+  <div class="mb-3">
+    <label>Image</label>
+    <input class="form-control" type="file" name="image" accept="image/*" required>
   </div>
   <button class="btn btn-success" type="submit">Add Item</button>
 </form>

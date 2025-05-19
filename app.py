@@ -1,12 +1,29 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from flask_sqlalchemy import SQLAlchemy
+from flask_sqlalchemy import SQLAlchemy
+import os
+from werkzeug.utils import secure_filename
 from datetime import datetime
+import os
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
+UPLOAD_FOLDER = os.path.join(app.root_path, 'static', 'images')
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 app.secret_key = 'supersecretkey'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///bidzone.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = 'static/images'
+
+UPLOAD_FOLDER = os.path.join(app.root_path, 'static', 'images')
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 db = SQLAlchemy(app)
 
@@ -24,6 +41,8 @@ class AuctionItem(db.Model):
     current_price = db.Column(db.Float, nullable=False)
     end_time = db.Column(db.DateTime, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    image_filename = db.Column(db.String(255), nullable=True)
+
 
 class Bid(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -72,6 +91,12 @@ def login():
             return redirect(url_for('index'))
         flash('Invalid credentials','danger')
     return render_template('login.html')
+    file = request.files.get('image')
+    if not (file and allowed_file(file.filename)):
+        flash('Please upload a valid image file.', 'warning')
+        return redirect(url_for('add'))
+    filename = secure_filename(file.filename)
+    file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
 @app.route('/logout')
 def logout():
@@ -83,22 +108,45 @@ def logout():
 def add():
     if 'user_id' not in session:
         return redirect(url_for('login'))
-    if request.method=='POST':
-        title=request.form['title']
-        description=request.form['description']
-        category=request.form['category']
-        start_price=float(request.form['starting_price'])
-        end_time=datetime.fromisoformat(request.form['end_time'])
+    if request.method == 'POST':
+        # debug prints
+        print("DEBUG form keys:", list(request.form.keys()))
+        print("DEBUG file keys:", list(request.files.keys()))
+
+        # gather form fields
+        title = request.form['title']
+        description = request.form['description']
+        category = request.form['category']
+        start_price = float(request.form['starting_price'])
+        end_time = datetime.fromisoformat(request.form['end_time'])
+
+        # handle image upload
+        file = request.files.get('image')
+        if not (file and allowed_file(file.filename)):
+            flash('Please upload a valid image file.', 'warning')
+            return redirect(url_for('add'))
+        filename = secure_filename(file.filename)
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+
+        # create and save item
         item = AuctionItem(
-            title=title, description=description, category=category,
-            starting_price=start_price, current_price=start_price,
-            end_time=end_time, user_id=session['user_id']
+            title=title,
+            description=description,
+            category=category,
+            starting_price=start_price,
+            current_price=start_price,
+            end_time=end_time,
+            user_id=session['user_id'],
+            image_filename=filename
         )
         db.session.add(item)
         db.session.commit()
-        flash('Item added','success')
+        flash('Item added', 'success')
         return redirect(url_for('index'))
+
+    # GET request
     return render_template('add.html')
+
 
 @app.route('/item/<int:item_id>', methods=['GET','POST'])
 def item_detail(item_id):

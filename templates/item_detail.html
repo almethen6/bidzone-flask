@@ -1,6 +1,10 @@
 {% extends "base.html" %}
 {% block content %}
 <h2>{{ item.title }}</h2>
+{% if item.image_filename %}
+<img src="{{ url_for('static', filename='images/' ~ item.image_filename) }}"
+     class="img-fluid mb-3" alt="{{ item.title }}">
+{% endif %}
 <p>{{ item.description }}</p>
 <p><strong>Current Price:</strong> {{ item.current_price }} KD</p>
 {% if session.get('user_id') %}
@@ -12,12 +16,12 @@
   <button class="btn btn-primary" type="submit">Place Bid</button>
 </form>
 {% else %}
-  <p><a href="{{ url_for('login') }}">Login</a> to place bids.</p>
+<p><a href="{{ url_for('login') }}">Login</a> to place bids.</p>
 {% endif %}
 <h3 class="mt-4">Bid History</h3>
 <ul class="list-group">
   {% for b in bids %}
-    <li class="list-group-item">{{ b.user_id }} bid {{ b.amount }} KD at {{ b.time }}</li>
+  <li class="list-group-item">{{ b.user_id }} bid {{ b.amount }} KD at {{ b.time }}</li>
   {% endfor %}
 </ul>
 {% endblock %}
